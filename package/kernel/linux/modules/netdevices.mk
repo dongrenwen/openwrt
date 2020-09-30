@@ -642,6 +642,48 @@ endef
 $(eval $(call KernelPackage,ixgbevf))
 
 
+define KernelPackage/i40e
+  SUBMENU:=$(NETWORK_DEVICES_MENU)
+  TITLE:=Intel(R) Ethernet Controller XL710 Family support
+  DEPENDS:=@PCI_SUPPORT +kmod-mdio +kmod-ptp +kmod-hwmon-core +LINUX_5_4:kmod-libphy
+  KCONFIG:=CONFIG_I40E \
+    CONFIG_I40E_VXLAN=n \
+    CONFIG_I40E_HWMON=y \
+    CONFIG_I40E_DCA=n
+  FILES:=$(LINUX_DIR)/drivers/net/ethernet/intel/i40e/i40e.ko
+  AUTOLOAD:=$(call AutoProbe,i40e)
+endef
+
+define KernelPackage/i40e/description
+ Kernel modules for Intel(R) Ethernet Controller XL710 Family 40 Gigabit Ethernet adapters.
+endef
+
+$(eval $(call KernelPackage,i40e))
+
+
+define KernelPackage/iavf
+  SUBMENU:=$(NETWORK_DEVICES_MENU)
+  TITLE:=Intel(R) Ethernet Adaptive Virtual Function support
+  DEPENDS:=@PCI_SUPPORT
+  KCONFIG:= \
+       CONFIG_I40EVF \
+       CONFIG_IAVF
+  FILES:= \
+       $(LINUX_DIR)/drivers/net/ethernet/intel/i40evf/i40evf.ko@lt4.20 \
+       $(LINUX_DIR)/drivers/net/ethernet/intel/iavf/iavf.ko@ge4.20
+  AUTOLOAD:=$(call AutoProbe,i40evf iavf)
+  AUTOLOAD:=$(call AutoProbe,iavf)
+endef
+
+define KernelPackage/iavf/description
+ Kernel modules for Intel XL710,
+	  X710, X722, XXV710, and all devices advertising support for
+	  Intel Ethernet Adaptive Virtual Function devices.
+endef
+
+$(eval $(call KernelPackage,iavf))
+
+
 define KernelPackage/b44
   TITLE:=Broadcom 44xx driver
   KCONFIG:=CONFIG_B44
@@ -930,7 +972,7 @@ $(eval $(call KernelPackage,of-mdio))
 
 define KernelPackage/vmxnet3
   SUBMENU:=$(NETWORK_DEVICES_MENU)
-  TITLE:=VMware VMXNET3 ethernet driver 
+  TITLE:=VMware VMXNET3 ethernet driver
   DEPENDS:=@PCI_SUPPORT
   KCONFIG:=CONFIG_VMXNET3
   FILES:=$(LINUX_DIR)/drivers/net/vmxnet3/vmxnet3.ko
@@ -1013,3 +1055,74 @@ define KernelPackage/be2net/description
 endef
 
 $(eval $(call KernelPackage,be2net))
+
+
+define KernelPackage/bnx2x
+  SUBMENU:=$(NETWORK_DEVICES_MENU)
+  TITLE:=QLogic 5771x/578xx 10/20-Gigabit ethernet adapter driver
+  DEPENDS:=@PCI_SUPPORT +bnx2x-firmware +kmod-lib-crc32c +kmod-mdio +kmod-ptp +kmod-lib-zlib-inflate
+  FILES:=$(LINUX_DIR)/drivers/net/ethernet/broadcom/bnx2x/bnx2x.ko
+  KCONFIG:= \
+	CONFIG_BNX2X \
+	CONFIG_BNX2X_SRIOV=y
+  AUTOLOAD:=$(call AutoProbe,bnx2x)
+endef
+
+define KernelPackage/bnx2x/description
+  QLogic BCM57710/57711/57711E/57712/57712_MF/57800/57800_MF/57810/57810_MF/57840/57840_MF Driver
+endef
+
+$(eval $(call KernelPackage,bnx2x))
+
+
+define KernelPackage/mlx4-core
+  SUBMENU:=$(NETWORK_DEVICES_MENU)
+  TITLE:=Mellanox ConnectX(R) mlx4 core Network Driver
+  DEPENDS:=@PCI_SUPPORT +kmod-ptp
+  FILES:= \
+	$(LINUX_DIR)/drivers/net/ethernet/mellanox/mlx4/mlx4_core.ko \
+	$(LINUX_DIR)/drivers/net/ethernet/mellanox/mlx4/mlx4_en.ko
+  KCONFIG:= CONFIG_MLX4_EN \
+	CONFIG_MLX4_EN_DCB=n \
+	CONFIG_MLX4_CORE=y \
+	CONFIG_MLX4_CORE_GEN2=y \
+	CONFIG_MLX4_DEBUG=n
+  AUTOLOAD:=$(call AutoProbe,mlx4_core mlx4_en)
+endef
+
+define KernelPackage/mlx4-core/description
+  Supports Mellanox ConnectX-3 series and previous cards
+endef
+
+$(eval $(call KernelPackage,mlx4-core))
+
+define KernelPackage/mlx5-core
+  SUBMENU:=$(NETWORK_DEVICES_MENU)
+  TITLE:=Mellanox ConnectX(R) mlx5 core Network Driver
+  DEPENDS:=@PCI_SUPPORT +kmod-ptp
+  FILES:=$(LINUX_DIR)/drivers/net/ethernet/mellanox/mlx5/core/mlx5_core.ko
+  KCONFIG:= CONFIG_MLX5_CORE \
+	CONFIG_MLX5_CORE_EN=y \
+	CONFIG_MLX5_CORE_EN_DCB=n \
+	CONFIG_MLX5_CORE_IPOIB=n \
+	CONFIG_MLX5_EN_ARFS=n \
+	CONFIG_MLX5_EN_IPSEC=n \
+	CONFIG_MLX5_EN_RXNFC=y \
+	CONFIG_MLX5_EN_TLS=n \
+	CONFIG_MLX5_ESWITCH=n \
+	CONFIG_MLX5_FPGA=n \
+	CONFIG_MLX5_FPGA_IPSEC=n \
+	CONFIG_MLX5_FPGA_TLS=n \
+	CONFIG_MLX5_MPFS=y \
+	CONFIG_MLX5_SW_STEERING=n \
+	CONFIG_MLX5_TC_CT=n \
+	CONFIG_MLX5_TLS=n
+  AUTOLOAD:=$(call AutoProbe,mlx5_core)
+endef
+
+define KernelPackage/mlx5-core/description
+  Supports Mellanox Connect-IB/ConnectX-4 series and later cards
+endef
+
+$(eval $(call KernelPackage,mlx5-core))
+
